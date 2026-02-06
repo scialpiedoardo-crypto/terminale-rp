@@ -81,11 +81,11 @@
         <div class="section">
             <h2>--- LIVELLO DI ALLERTA NAZIONALE ---</h2>
             <div id="defcon-panel">
-                <button class="def-btn lvl-5 active" onclick="setDefcon(5, this)">DEFCON 5<br>STANDARD</button>
-                <button class="def-btn lvl-4" onclick="setDefcon(4, this)">DEFCON 4<br>INCREMENTATO</button>
-                <button class="def-btn lvl-3" onclick="setDefcon(3, this)">DEFCON 3<br>SQUADRE PRONTE</button>
-                <button class="def-btn lvl-2" onclick="setDefcon(2, this)">DEFCON 2<br>PRE-ALLARME</button>
-                <button class="def-btn lvl-1" onclick="setDefcon(1, this)">DEFCON 1<br>MOBILITAZIONE</button>
+                <button id="btn-def-5" class="def-btn lvl-5" onclick="setDefcon(5)">DEFCON 5<br>STANDARD</button>
+                <button id="btn-def-4" class="def-btn lvl-4" onclick="setDefcon(4)">DEFCON 4<br>INCREMENTATO</button>
+                <button id="btn-def-3" class="def-btn lvl-3" onclick="setDefcon(3)">DEFCON 3<br>SQUADRE PRONTE</button>
+                <button id="btn-def-2" class="def-btn lvl-2" onclick="setDefcon(2)">DEFCON 2<br>PRE-ALLARME</button>
+                <button id="btn-def-1" class="def-btn lvl-1" onclick="setDefcon(1)">DEFCON 1<br>MOBILITAZIONE</button>
             </div>
         </div>
 
@@ -144,50 +144,125 @@
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 <script>
+    // Configurazione Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDUYP03zV8hW-lewKJIOCZbm1BuRTm_ZOw",
+        authDomain: "sismi-db.firebaseapp.com",
+        databaseURL: "https://sismi-db-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "sismi-db",
+        storageBucket: "sismi-db.firebasestorage.app",
+        messagingSenderId: "1030625320459",
+        appId: "1:1030625320459:web:57847e28750888f274710e"
+    };
+
+    // Inizializzazione
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const CODICE_CORRETTO = "1466703569586618473";
     let currentUser = "";
 
+    // --- FUNZIONI CORE FIREBASE ---
+
+    // 1. Caricamento Dati Iniziale
+    function loadData() {
+        // Ascolta Cambiamenti DEFCON
+        db.ref('sistema/defcon').on('value', (snapshot) => {
+            const level = snapshot.val() || 5;
+            updateDefconUI(level);
+        });
+
+        // Ascolta Audit Log
+        db.ref('audit').limitToLast(20).on('value', (snapshot) => {
+            const container = document.getElementById('audit-log-body');
+            container.innerHTML = "";
+            snapshot.forEach((child) => {
+                const data = child.val();
+                const entry = document.createElement('div');
+                entry.className = 'audit-row';
+                entry.innerHTML = `<span class="audit-time">[${data.ora}]</span> <span class="audit-user">${data.utente}</span> <span>${data.azione}</span>`;
+                container.prepend(entry);
+            });
+        });
+
+        // Ascolta Dossier
+        db.ref('dossier').on('value', (snapshot) => {
+            const list = document.getElementById('dossier-list');
+            list.innerHTML = "";
+            snapshot.forEach((child) => {
+                const d = child.val();
+                const div = document.createElement('div');
+                div.className = 'card';
+                let contentHTML = d.contenuto.replace(/\[R\](.*?)\[R\]/g, '<span class="redacted">$1</span>');
+                div.innerHTML = `<h3>${d.titolo}</h3><p style="white-space:pre-wrap;">${contentHTML}</p>
+                <button class="delete-btn" onclick="deleteEntry('dossier', '${child.key}', 'DOSSIER')">ELIMINA</button>`;
+                list.prepend(div);
+            });
+        });
+
+        // Ascolta Cittadini
+        db.ref('cittadini').on('value', (snapshot) => {
+            const table = document.getElementById('citizen-table-body');
+            table.innerHTML = "";
+            snapshot.forEach((child) => {
+                const c = child.val();
+                const row = table.insertRow(0);
+                row.innerHTML = `
+                    <td><img src="${c.foto}" class="cit-photo"></td>
+                    <td><strong>${c.nome}</strong></td>
+                    <td>${c.livello}</td>
+                    <td>${c.note}</td>
+                    <td><button class="delete-btn" onclick="deleteEntry('cittadini', '${child.key}', 'SCHEDA CITTADINO')">X</button></td>
+                `;
+            });
+        });
+
+        // Ascolta Operazioni
+        db.ref('operazioni').on('value', (snapshot) => {
+            const list = document.getElementById('operation-list');
+            list.innerHTML = "";
+            snapshot.forEach((child) => {
+                const op = child.val();
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <h3>OPERAZIONE: ${op.titolo}</h3>
+                    <p><strong>DESCRIZIONE:</strong></p>
+                    <p style="white-space:pre-wrap;">${op.desc}</p>
+                    ${op.foto ? `<img src="${op.foto}" class="op-photo">` : ''}
+                    <button class="delete-btn" onclick="deleteEntry('operazioni', '${child.key}', 'OPERAZIONE')">ARCHIVIA</button>
+                `;
+                list.prepend(div);
+            });
+        });
+    }
+
+    // 2. Funzioni di Scrittura
     function addAudit(azione) {
         const now = new Date();
         const time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
-        const entry = document.createElement('div');
-        entry.className = 'audit-row';
-        entry.innerHTML = `<span class="audit-time">[${time}]</span> <span class="audit-user">${currentUser}</span> <span>${azione}</span>`;
-        document.getElementById('audit-log-body').prepend(entry);
+        db.ref('audit').push({ utente: currentUser, azione: azione, ora: time });
     }
 
-    function checkAccess() {
-        const user = document.getElementById('discord-user').value;
-        const code = document.getElementById('role-code').value.trim();
-        if (code === CODICE_CORRETTO && user !== "") {
-            currentUser = user.toUpperCase();
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-terminal').style.display = 'block';
-            document.getElementById('active-user').innerText = currentUser;
-            addAudit("LOG-IN: ACCESSO EFFETTUATO AL TERMINALE");
-            startSystemConsole(); 
-        } else {
-            document.getElementById('login-error').style.display = 'block';
-            setTimeout(() => { document.getElementById('login-error').style.display = 'none'; }, 3000);
-        }
-    }
-
-    function setDefcon(level, btn) {
-        document.querySelectorAll('.def-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    function setDefcon(level) {
+        db.ref('sistema/defcon').set(level);
         addAudit(`VARIAZIONE STATO ALLERTA: DEFCON ${level}`);
+    }
+
+    function updateDefconUI(level) {
+        document.querySelectorAll('.def-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-def-' + level).classList.add('active');
     }
 
     function addDossier() {
         const title = document.getElementById('dos-title').value;
-        let content = document.getElementById('dos-content').value;
-        if(!title) return;
-        content = content.replace(/\[R\](.*?)\[R\]/g, '<span class="redacted">$1</span>');
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `<h3 contenteditable="true">${title}</h3><p contenteditable="true" style="white-space:pre-wrap;">${content}</p><button class="delete-btn" onclick="this.parentElement.remove(); addAudit('ELIMINAZIONE DOSSIER');">ELIMINA</button>`;
-        document.getElementById('dossier-list').prepend(div);
+        const content = document.getElementById('dos-content').value;
+        if(!title || !content) return;
+        db.ref('dossier').push({ titolo: title, contenuto: content });
         addAudit(`CREAZIONE DOSSIER: ${title}`);
         document.getElementById('dos-title').value = ''; document.getElementById('dos-content').value = '';
     }
@@ -197,20 +272,7 @@
         const photo = document.getElementById('cit-photo').value || 'https://via.placeholder.com/60?text=S.I.S.';
         const level = document.getElementById('cit-level').value;
         if(!name) return;
-        const row = document.getElementById('citizen-table-body').insertRow(0);
-        row.innerHTML = `
-            <td><img src="${photo}" class="cit-photo"></td>
-            <td contenteditable="true"><strong>${name}</strong></td>
-            <td>
-                <select onchange="addAudit('MODIFICA MINACCIA SOGGETTO')">
-                    <option value="BASSA" ${level=='BASSA'?'selected':''}>BASSA</option>
-                    <option value="MEDIA" ${level=='MEDIA'?'selected':''}>MEDIA</option>
-                    <option value="ALTA" ${level=='ALTA'?'selected':''}>ALTA</option>
-                </select>
-            </td>
-            <td contenteditable="true">Inserire note...</td>
-            <td><button class="delete-btn" onclick="this.parentElement.parentElement.remove(); addAudit('RIMOZIONE SCHEDA CITTADINO');">X</button></td>
-        `;
+        db.ref('cittadini').push({ nome: name, foto: photo, livello: level, note: "In attesa di aggiornamento..." });
         addAudit(`REGISTRAZIONE SOGGETTO: ${name}`);
         document.getElementById('cit-name').value = ''; document.getElementById('cit-photo').value = '';
     }
@@ -220,18 +282,34 @@
         const desc = document.getElementById('op-desc').value;
         const photo = document.getElementById('op-photo').value;
         if(!title) return;
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-            <h3>OPERAZIONE: <span contenteditable="true">${title}</span></h3>
-            <p><strong>DESCRIZIONE:</strong></p>
-            <p contenteditable="true" style="white-space:pre-wrap;">${desc}</p>
-            ${photo ? `<img src="${photo}" class="op-photo">` : ''}
-            <button class="delete-btn" onclick="this.parentElement.remove(); addAudit('ARCHIVIAZIONE OPERAZIONE');">ARCHIVIA</button>
-        `;
-        document.getElementById('operation-list').prepend(div);
+        db.ref('operazioni').push({ titolo: title, desc: desc, foto: photo });
         addAudit(`INVIO DATI OPERATIVI: ${title}`);
         document.getElementById('op-title').value = ''; document.getElementById('op-desc').value = ''; document.getElementById('op-photo').value = '';
+    }
+
+    function deleteEntry(path, key, tipo) {
+        if(confirm("CONFERMARE ELIMINAZIONE DEFINITIVA?")) {
+            db.ref(path + '/' + key).remove();
+            addAudit(`ELIMINAZIONE ${tipo}`);
+        }
+    }
+
+    // --- LOGICA DI ACCESSO ---
+    function checkAccess() {
+        const user = document.getElementById('discord-user').value;
+        const code = document.getElementById('role-code').value.trim();
+        if (code === CODICE_CORRETTO && user !== "") {
+            currentUser = user.toUpperCase();
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-terminal').style.display = 'block';
+            document.getElementById('active-user').innerText = currentUser;
+            loadData(); // Carica i dati da Firebase solo dopo il login
+            addAudit("LOG-IN: ACCESSO EFFETTUATO AL TERMINALE");
+            startSystemConsole(); 
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+            setTimeout(() => { document.getElementById('login-error').style.display = 'none'; }, 3000);
+        }
     }
 
     function startSystemConsole() {
