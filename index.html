@@ -41,6 +41,10 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
         th, td { border: 1px solid #00ff41; padding: 8px; text-align: left; }
         
+        /* Cella Note Modificabile */
+        .editable-note { cursor: text; min-width: 200px; transition: 0.2s; }
+        .editable-note:focus { background: rgba(0, 255, 65, 0.1); outline: 1px dashed #00ff41; }
+
         /* --- DEFCON --- */
         #defcon-panel { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
         .def-btn { flex: 1; padding: 10px; border: 1px solid #00ff41; color: #00ff41; background: transparent; cursor: pointer; font-size: 10px; }
@@ -122,7 +126,7 @@
             </div>
             <table>
                 <thead>
-                    <tr><th>FOTO</th><th>SOGGETTO</th><th>MINACCIA</th><th>NOTE OPERATIVE</th><th>AZIONE</th></tr>
+                    <tr><th>FOTO</th><th>SOGGETTO</th><th>MINACCIA</th><th>NOTE OPERATIVE (CLICCA PER SCRIVERE)</th><th>AZIONE</th></tr>
                 </thead>
                 <tbody id="citizen-table-body"></tbody>
             </table>
@@ -159,24 +163,18 @@
         appId: "1:1030625320459:web:57847e28750888f274710e"
     };
 
-    // Inizializzazione
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     const CODICE_CORRETTO = "1466703569586618473";
     let currentUser = "";
 
-    // --- FUNZIONI CORE FIREBASE ---
-
-    // 1. Caricamento Dati Iniziale
     function loadData() {
-        // Ascolta Cambiamenti DEFCON
         db.ref('sistema/defcon').on('value', (snapshot) => {
             const level = snapshot.val() || 5;
             updateDefconUI(level);
         });
 
-        // Ascolta Audit Log
         db.ref('audit').limitToLast(20).on('value', (snapshot) => {
             const container = document.getElementById('audit-log-body');
             container.innerHTML = "";
@@ -189,7 +187,6 @@
             });
         });
 
-        // Ascolta Dossier
         db.ref('dossier').on('value', (snapshot) => {
             const list = document.getElementById('dossier-list');
             list.innerHTML = "";
@@ -204,24 +201,24 @@
             });
         });
 
-        // Ascolta Cittadini
+        // --- SCHEDE CITTADINI CON NOTE MODIFICABILI ---
         db.ref('cittadini').on('value', (snapshot) => {
             const table = document.getElementById('citizen-table-body');
             table.innerHTML = "";
             snapshot.forEach((child) => {
                 const c = child.val();
+                const key = child.key;
                 const row = table.insertRow(0);
                 row.innerHTML = `
                     <td><img src="${c.foto}" class="cit-photo"></td>
                     <td><strong>${c.nome}</strong></td>
                     <td>${c.livello}</td>
-                    <td>${c.note}</td>
-                    <td><button class="delete-btn" onclick="deleteEntry('cittadini', '${child.key}', 'SCHEDA CITTADINO')">X</button></td>
+                    <td class="editable-note" contenteditable="true" onblur="updateCitizenNote('${key}', this.innerText)">${c.note}</td>
+                    <td><button class="delete-btn" onclick="deleteEntry('cittadini', '${key}', 'SCHEDA CITTADINO')">X</button></td>
                 `;
             });
         });
 
-        // Ascolta Operazioni
         db.ref('operazioni').on('value', (snapshot) => {
             const list = document.getElementById('operation-list');
             list.innerHTML = "";
@@ -241,7 +238,15 @@
         });
     }
 
-    // 2. Funzioni di Scrittura
+    // Salvataggio Note Cittadino
+    function updateCitizenNote(key, newText) {
+        db.ref('cittadini/' + key).update({
+            note: newText
+        }).then(() => {
+            addAudit("AGGIORNAMENTO NOTE SOGGETTO");
+        });
+    }
+
     function addAudit(azione) {
         const now = new Date();
         const time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
@@ -272,7 +277,7 @@
         const photo = document.getElementById('cit-photo').value || 'https://via.placeholder.com/60?text=S.I.S.';
         const level = document.getElementById('cit-level').value;
         if(!name) return;
-        db.ref('cittadini').push({ nome: name, foto: photo, livello: level, note: "In attesa di aggiornamento..." });
+        db.ref('cittadini').push({ nome: name, foto: photo, livello: level, note: "IN ATTESA DI AGGIORNAMENTO..." });
         addAudit(`REGISTRAZIONE SOGGETTO: ${name}`);
         document.getElementById('cit-name').value = ''; document.getElementById('cit-photo').value = '';
     }
@@ -294,7 +299,6 @@
         }
     }
 
-    // --- LOGICA DI ACCESSO ---
     function checkAccess() {
         const user = document.getElementById('discord-user').value;
         const code = document.getElementById('role-code').value.trim();
@@ -303,7 +307,7 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-terminal').style.display = 'block';
             document.getElementById('active-user').innerText = currentUser;
-            loadData(); // Carica i dati da Firebase solo dopo il login
+            loadData();
             addAudit("LOG-IN: ACCESSO EFFETTUATO AL TERMINALE");
             startSystemConsole(); 
         } else {
@@ -332,3 +336,4 @@
 
 </body>
 </html>
+
