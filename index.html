@@ -13,83 +13,52 @@
             overflow-x: hidden;
         }
 
-        /* --- SCHERMATA LOGIN --- */
-        #login-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 90vh;
-        }
-
-        .login-box {
-            border: 2px solid #00ff41;
-            padding: 40px;
-            background: rgba(0, 255, 65, 0.05);
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        /* --- TERMINALE --- */
-        #main-terminal {
-            display: none;
-        }
-
-        .container {
-            border: 2px solid #00ff41;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
-        }
-
+        /* --- UI DI BASE --- */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 90vh; }
+        .login-box { border: 2px solid #00ff41; padding: 40px; background: rgba(0, 255, 65, 0.05); text-align: center; max-width: 400px; width: 100%; }
+        #main-terminal { display: none; }
+        .container { border: 2px solid #00ff41; padding: 20px; box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); background: rgba(0,0,0,0.9); }
         h1, h2 { text-align: center; border-bottom: 1px solid #00ff41; padding-bottom: 10px; }
-        .section { margin-bottom: 40px; }
+        .section { margin-bottom: 50px; }
+        .admin-panel { background: #111; border: 1px dashed #00ff41; padding: 15px; margin-bottom: 20px; }
 
-        .admin-panel {
-            background: #111;
-            border: 1px dashed #00ff41;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
+        /* --- INPUT & BOTTONI --- */
         input, textarea, select {
-            background: #000;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 10px;
-            margin: 5px 0;
-            width: 100%;
-            box-sizing: border-box;
-            font-family: 'Courier New', monospace;
+            background: #000; border: 1px solid #00ff41; color: #00ff41; padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; font-family: 'Courier New', monospace;
         }
+        button { background: #00ff41; color: #000; border: none; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; transition: 0.3s; }
+        button:hover { background: #00cc33; box-shadow: 0 0 10px #00ff41; }
+        .delete-btn { background: #aa0000; color: #fff; width: auto; padding: 5px 10px; font-size: 11px; margin-top: 5px; border: none; cursor: pointer; }
 
-        button {
-            background: #00ff41;
-            color: #000;
-            border: none;
-            padding: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 10px;
-        }
+        /* --- CARDS & FOTO --- */
+        .card { border: 1px solid #00ff41; padding: 15px; margin: 15px 0; background: rgba(0, 255, 65, 0.03); }
+        .redacted { background-color: #00ff41; color: #00ff41; transition: 0.3s; cursor: help; padding: 0 4px; }
+        .redacted:hover { background-color: transparent; }
+        .op-photo { max-width: 400px; display: block; margin-top: 10px; border: 1px solid #00ff41; }
+        .cit-photo { width: 60px; height: 60px; object-fit: cover; border: 1px solid #00ff41; }
 
-        button.delete-btn { background: #aa0000; color: #fff; width: auto; padding: 5px 10px; font-size: 11px; }
+        /* --- TABELLA --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th, td { border: 1px solid #00ff41; padding: 8px; text-align: left; }
+        
+        /* --- DEFCON --- */
+        #defcon-panel { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+        .def-btn { flex: 1; padding: 10px; border: 1px solid #00ff41; color: #00ff41; background: transparent; cursor: pointer; font-size: 10px; }
+        .def-btn.active { color: #000; font-weight: bold; }
+        .lvl-5.active { background: #00ff41; box-shadow: 0 0 15px #00ff41; }
+        .lvl-4.active { background: #aaff00; box-shadow: 0 0 15px #aaff00; }
+        .lvl-3.active { background: #ffff00; box-shadow: 0 0 15px #ffff00; }
+        .lvl-2.active { background: #ffaa00; box-shadow: 0 0 15px #ffaa00; }
+        .lvl-1.active { background: #ff0000; box-shadow: 0 0 15px #ff0000; color: white; }
 
-        .op-card { border: 1px solid #00ff41; padding: 15px; margin: 15px 0; background: rgba(0, 255, 65, 0.03); }
-        .op-image { display: block; max-width: 100%; max-height: 400px; margin-top: 10px; border: 1px solid #00ff41; }
+        /* --- AUDIT LOG --- */
+        #audit-container { max-height: 150px; overflow-y: auto; background: #050505; border: 1px solid #444; margin-bottom: 20px; }
+        .audit-row { border-bottom: 1px solid #222; padding: 5px; display: flex; gap: 15px; font-size: 11px; }
+        .audit-time { color: #888; min-width: 80px; }
+        .audit-user { color: #00ff41; min-width: 100px; font-weight: bold; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #00ff41; padding: 10px; text-align: left; }
-        .editable-cell { background: rgba(0, 255, 65, 0.1); outline: none; }
-        .danger-high { color: #ff0000; }
-        .danger-med { color: #ffaa00; }
-
-        body::before {
-            content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            z-index: 9999; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
+        /* --- SYSTEM CONSOLE --- */
+        #console-log { background: #000; border: 1px solid #00ff41; height: 120px; overflow-y: hidden; padding: 10px; font-size: 12px; margin-top: 20px; color: #00ff41; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -108,145 +77,178 @@
 <div id="main-terminal">
     <div class="container">
         <p style="text-align: right;">OPERATORE: <span id="active-user"></span> | STATO: ONLINE</p>
-        <h1>DATABASE OPERATIVO</h1>
-
+        
         <div class="section">
-            <h2>--- OPERAZIONI ---</h2>
-            <div class="admin-panel">
-                <input type="text" id="op-name" placeholder="NOME OPERAZIONE">
-                <textarea id="op-desc" placeholder="DESCRIZIONE"></textarea>
-                <input type="text" id="op-img-url" placeholder="URL IMMAGINE">
-                <button onclick="addOp()">ARCHIVIA OPERAZIONE</button>
+            <h2>--- LIVELLO DI ALLERTA NAZIONALE ---</h2>
+            <div id="defcon-panel">
+                <button class="def-btn lvl-5 active" onclick="setDefcon(5, this)">DEFCON 5<br>STANDARD</button>
+                <button class="def-btn lvl-4" onclick="setDefcon(4, this)">DEFCON 4<br>INCREMENTATO</button>
+                <button class="def-btn lvl-3" onclick="setDefcon(3, this)">DEFCON 3<br>SQUADRE PRONTE</button>
+                <button class="def-btn lvl-2" onclick="setDefcon(2, this)">DEFCON 2<br>PRE-ALLARME</button>
+                <button class="def-btn lvl-1" onclick="setDefcon(1, this)">DEFCON 1<br>MOBILITAZIONE</button>
             </div>
-            <div id="op-list"></div>
         </div>
 
         <div class="section">
-            <h2>--- CITTADINI ---</h2>
+            <h2>--- REGISTRO ACCESSI (AUDIT LOG) ---</h2>
+            <div id="audit-container">
+                <div id="audit-log-body"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>--- ARCHIVIO DOSSIER ---</h2>
             <div class="admin-panel">
-                <input type="text" id="cit-name" placeholder="NOME CITTADINO">
-                <select id="cit-status">
-                    <option value="Bassa">BASSA</option>
-                    <option value="Media">MEDIA</option>
-                    <option value="Alta">ALTA</option>
-                </select>
-                <button onclick="addCit()">AGGIUNGI SCHEDA</button>
+                <input type="text" id="dos-title" placeholder="TITOLO">
+                <textarea id="dos-content" placeholder="CONTENUTO (Usa [R]testo[R] per oscurare)"></textarea>
+                <button onclick="addDossier()">ARCHIVIA DOSSIER</button>
+            </div>
+            <div id="dossier-list"></div>
+        </div>
+
+        <div class="section">
+            <h2>--- SCHEDE CITTADINI ---</h2>
+            <div class="admin-panel">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="cit-name" placeholder="NOME">
+                    <input type="text" id="cit-photo" placeholder="URL FOTO">
+                    <select id="cit-level">
+                        <option value="BASSA">BASSA</option>
+                        <option value="MEDIA">MEDIA</option>
+                        <option value="ALTA">ALTA</option>
+                    </select>
+                </div>
+                <button onclick="addCitizen()">REGISTRA SOGGETTO</button>
             </div>
             <table>
                 <thead>
-                    <tr>
-                        <th>NOME (MOD.)</th>
-                        <th>STATO (MOD.)</th>
-                        <th>NOTE (MOD.)</th>
-                        <th>AZIONI</th>
-                    </tr>
+                    <tr><th>FOTO</th><th>SOGGETTO</th><th>MINACCIA</th><th>NOTE OPERATIVE</th><th>AZIONE</th></tr>
                 </thead>
-                <tbody id="cit-table"></tbody>
+                <tbody id="citizen-table-body"></tbody>
             </table>
         </div>
+
+        <div class="section">
+            <h2>--- DATABASE OPERAZIONI ---</h2>
+            <div class="admin-panel">
+                <input type="text" id="op-title" placeholder="OPERAZIONE">
+                <textarea id="op-desc" placeholder="DESCRIZIONE"></textarea>
+                <input type="text" id="op-photo" placeholder="URL FOTO">
+                <button onclick="addOperation()">INVIA AL DATABASE</button>
+            </div>
+            <div id="operation-list"></div>
+        </div>
+
+        <h2>--- OUTPUT CONSOLE DI SISTEMA ---</h2>
+        <div id="console-log"></div>
     </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-
 <script>
-    // Configurazione SISMI-DB
-    const firebaseConfig = {
-      apiKey: "AIzaSyDUYP03zV8hW-lewKJIOCZbm1BuRTm_ZOw",
-      authDomain: "sismi-db.firebaseapp.com",
-      projectId: "sismi-db",
-      storageBucket: "sismi-db.firebasestorage.app",
-      messagingSenderId: "1030625320459",
-      appId: "1:1030625320459:web:3a81d8d37d809ea374710e",
-      databaseURL: "https://sismi-db-default-rtdb.europe-west1.firebasedatabase.app/"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
     const CODICE_CORRETTO = "1466703569586618473";
+    let currentUser = "";
+
+    function addAudit(azione) {
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
+        const entry = document.createElement('div');
+        entry.className = 'audit-row';
+        entry.innerHTML = `<span class="audit-time">[${time}]</span> <span class="audit-user">${currentUser}</span> <span>${azione}</span>`;
+        document.getElementById('audit-log-body').prepend(entry);
+    }
 
     function checkAccess() {
         const user = document.getElementById('discord-user').value;
         const code = document.getElementById('role-code').value.trim();
-        
         if (code === CODICE_CORRETTO && user !== "") {
+            currentUser = user.toUpperCase();
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-terminal').style.display = 'block';
-            document.getElementById('active-user').innerText = user.toUpperCase();
-            loadSavedData();
+            document.getElementById('active-user').innerText = currentUser;
+            addAudit("LOG-IN: ACCESSO EFFETTUATO AL TERMINALE");
+            startSystemConsole(); 
         } else {
             document.getElementById('login-error').style.display = 'block';
             setTimeout(() => { document.getElementById('login-error').style.display = 'none'; }, 3000);
         }
     }
 
-    function loadSavedData() {
-        db.ref('operazioni').on('value', (snapshot) => {
-            const opList = document.getElementById('op-list');
-            opList.innerHTML = '';
-            const data = snapshot.val();
-            for (let id in data) { renderOp(id, data[id]); }
-        });
-
-        db.ref('cittadini').on('value', (snapshot) => {
-            const citTable = document.getElementById('cit-table');
-            citTable.innerHTML = '';
-            const data = snapshot.val();
-            for (let id in data) { renderCit(id, data[id]); }
-        });
+    function setDefcon(level, btn) {
+        document.querySelectorAll('.def-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        addAudit(`VARIAZIONE STATO ALLERTA: DEFCON ${level}`);
     }
 
-    function addOp() {
-        const name = document.getElementById('op-name').value;
-        const desc = document.getElementById('op-desc').value;
-        const imgUrl = document.getElementById('op-img-url').value.trim();
-        if(name && desc) {
-            db.ref('operazioni').push({ name, desc, imgUrl });
-            document.getElementById('op-name').value = ''; 
-            document.getElementById('op-desc').value = ''; 
-            document.getElementById('op-img-url').value = '';
-        }
-    }
-
-    function addCit() {
-        const name = document.getElementById('cit-name').value;
-        const status = document.getElementById('cit-status').value;
-        if(name) {
-            db.ref('cittadini').push({ name, status, note: "INSERIRE NOTE..." });
-            document.getElementById('cit-name').value = '';
-        }
-    }
-
-    function renderOp(id, op) {
+    function addDossier() {
+        const title = document.getElementById('dos-title').value;
+        let content = document.getElementById('dos-content').value;
+        if(!title) return;
+        content = content.replace(/\[R\](.*?)\[R\]/g, '<span class="redacted">$1</span>');
         const div = document.createElement('div');
-        div.className = 'op-card';
-        let imgHtml = op.imgUrl ? `<img src="${op.imgUrl}" class="op-image" onerror="this.style.display='none'">` : '';
-        div.innerHTML = `
-            <h3>OPERAZIONE: ${op.name}</h3>
-            <p style="white-space: pre-wrap;">${op.desc}</p>
-            ${imgHtml}
-            <button class="delete-btn" onclick="deleteData('operazioni/${id}')">ELIMINA</button>
-        `;
-        document.getElementById('op-list').prepend(div);
+        div.className = 'card';
+        div.innerHTML = `<h3 contenteditable="true">${title}</h3><p contenteditable="true" style="white-space:pre-wrap;">${content}</p><button class="delete-btn" onclick="this.parentElement.remove(); addAudit('ELIMINAZIONE DOSSIER');">ELIMINA</button>`;
+        document.getElementById('dossier-list').prepend(div);
+        addAudit(`CREAZIONE DOSSIER: ${title}`);
+        document.getElementById('dos-title').value = ''; document.getElementById('dos-content').value = '';
     }
 
-    function renderCit(id, cit) {
-        const row = document.getElementById('cit-table').insertRow(0);
-        let color = cit.status === 'Alta' ? 'danger-high' : (cit.status === 'Media' ? 'danger-med' : '');
+    function addCitizen() {
+        const name = document.getElementById('cit-name').value;
+        const photo = document.getElementById('cit-photo').value || 'https://via.placeholder.com/60?text=S.I.S.';
+        const level = document.getElementById('cit-level').value;
+        if(!name) return;
+        const row = document.getElementById('citizen-table-body').insertRow(0);
         row.innerHTML = `
-            <td class="editable-cell" contenteditable="true">${cit.name}</td>
-            <td class="editable-cell ${color}" contenteditable="true">${cit.status.toUpperCase()}</td>
-            <td class="editable-cell" contenteditable="true">${cit.note}</td>
-            <td><button class="delete-btn" onclick="deleteData('cittadini/${id}')">X</button></td>
+            <td><img src="${photo}" class="cit-photo"></td>
+            <td contenteditable="true"><strong>${name}</strong></td>
+            <td>
+                <select onchange="addAudit('MODIFICA MINACCIA SOGGETTO')">
+                    <option value="BASSA" ${level=='BASSA'?'selected':''}>BASSA</option>
+                    <option value="MEDIA" ${level=='MEDIA'?'selected':''}>MEDIA</option>
+                    <option value="ALTA" ${level=='ALTA'?'selected':''}>ALTA</option>
+                </select>
+            </td>
+            <td contenteditable="true">Inserire note...</td>
+            <td><button class="delete-btn" onclick="this.parentElement.parentElement.remove(); addAudit('RIMOZIONE SCHEDA CITTADINO');">X</button></td>
         `;
+        addAudit(`REGISTRAZIONE SOGGETTO: ${name}`);
+        document.getElementById('cit-name').value = ''; document.getElementById('cit-photo').value = '';
     }
 
-    function deleteData(path) {
-        if(confirm("ELIMINARE DEFINITIVAMENTE DALL'ARCHIVIO?")) {
-            db.ref(path).remove();
-        }
+    function addOperation() {
+        const title = document.getElementById('op-title').value;
+        const desc = document.getElementById('op-desc').value;
+        const photo = document.getElementById('op-photo').value;
+        if(!title) return;
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+            <h3>OPERAZIONE: <span contenteditable="true">${title}</span></h3>
+            <p><strong>DESCRIZIONE:</strong></p>
+            <p contenteditable="true" style="white-space:pre-wrap;">${desc}</p>
+            ${photo ? `<img src="${photo}" class="op-photo">` : ''}
+            <button class="delete-btn" onclick="this.parentElement.remove(); addAudit('ARCHIVIAZIONE OPERAZIONE');">ARCHIVIA</button>
+        `;
+        document.getElementById('operation-list').prepend(div);
+        addAudit(`INVIO DATI OPERATIVI: ${title}`);
+        document.getElementById('op-title').value = ''; document.getElementById('op-desc').value = ''; document.getElementById('op-photo').value = '';
+    }
+
+    function startSystemConsole() {
+        const logs = [
+            "[INFO] Stabilizzazione tunnel VPN...", "[SYSTEM] Controllo integrità database...",
+            "[WARN] Tentativo di ping esterno rilevato.", "[INFO] Crittografia AES-256 attiva.",
+            "[SYSTEM] Sincronizzazione orologio atomico.", "[INFO] Bypass firewall completato.",
+            "[DEBUG] Buffer overflow evitato.", "[INFO] Messaggio criptato ricevuto."
+        ];
+        setInterval(() => {
+            const consoleBox = document.getElementById('console-log');
+            const logEntry = document.createElement('div');
+            logEntry.innerText = "> " + logs[Math.floor(Math.random() * logs.length)];
+            consoleBox.appendChild(logEntry);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+            if (consoleBox.childNodes.length > 7) consoleBox.removeChild(consoleBox.firstChild);
+        }, 3000);
     }
 </script>
 
