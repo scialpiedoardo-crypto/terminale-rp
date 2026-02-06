@@ -31,7 +31,7 @@
             max-width: 400px;
         }
 
-        /* --- TERMINALE (Nascosto all'avvio) --- */
+        /* --- TERMINALE --- */
         #main-terminal {
             display: none;
         }
@@ -76,21 +76,18 @@
 
         button.delete-btn { background: #aa0000; color: #fff; width: auto; padding: 5px 10px; font-size: 11px; }
 
-        /* Operazioni */
         .op-card { border: 1px solid #00ff41; padding: 15px; margin: 15px 0; background: rgba(0, 255, 65, 0.03); }
         .op-image { display: block; max-width: 100%; max-height: 400px; margin-top: 10px; border: 1px solid #00ff41; }
 
-        /* Tabelle */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #00ff41; padding: 10px; text-align: left; }
         .editable-cell { background: rgba(0, 255, 65, 0.1); outline: none; }
         .danger-high { color: #ff0000; }
         .danger-med { color: #ffaa00; }
 
-        /* Effetto Scanline */
         body::before {
             content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.02));
             z-index: 9999; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
     </style>
@@ -138,9 +135,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>NOME (MOD.)</th>
-                        <th>STATO (MOD.)</th>
-                        <th>NOTE (MOD.)</th>
+                        <th>NOME</th>
+                        <th>STATO</th>
+                        <th>NOTE</th>
                         <th>AZIONI</th>
                     </tr>
                 </thead>
@@ -150,7 +147,24 @@
     </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
 <script>
+    // Configurazione con le TUE chiavi
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUYP03zV8hW-lewKJIOCZbm1BuRTm_ZOw",
+      authDomain: "sismi-db.firebaseapp.com",
+      projectId: "sismi-db",
+      storageBucket: "sismi-db.firebasestorage.app",
+      messagingSenderId: "1030625320459",
+      appId: "1:1030625320459:web:3a81d8d37d809ea374710e",
+      databaseURL: "https://sismi-db-default-rtdb.europe-west1.firebasedatabase.app/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const CODICE_CORRETTO = "1466703569586618473";
 
     function checkAccess() {
@@ -161,29 +175,40 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-terminal').style.display = 'block';
             document.getElementById('active-user').innerText = user.toUpperCase();
+            loadData(); // Carica i dati dal DB
         } else {
             document.getElementById('login-error').style.display = 'block';
             setTimeout(() => { document.getElementById('login-error').style.display = 'none'; }, 3000);
         }
     }
 
+    // Carica dati in tempo reale
+    function loadData() {
+        db.ref('operazioni').on('value', (snapshot) => {
+            const opList = document.getElementById('op-list');
+            opList.innerHTML = '';
+            const data = snapshot.val();
+            for (let id in data) {
+                renderOp(id, data[id]);
+            }
+        });
+
+        db.ref('cittadini').on('value', (snapshot) => {
+            const citTable = document.getElementById('cit-table');
+            citTable.innerHTML = '';
+            const data = snapshot.val();
+            for (let id in data) {
+                renderCit(id, data[id]);
+            }
+        });
+    }
+
     function addOp() {
         const name = document.getElementById('op-name').value;
         const desc = document.getElementById('op-desc').value;
         const imgUrl = document.getElementById('op-img-url').value.trim();
-        
         if(name && desc) {
-            const div = document.createElement('div');
-            div.className = 'op-card';
-            let imgHtml = imgUrl ? `<img src="${imgUrl}" class="op-image" onerror="this.style.display='none'">` : '';
-            
-            div.innerHTML = `
-                <h3>OPERAZIONE: ${name}</h3>
-                <p style="white-space: pre-wrap;">${desc}</p>
-                ${imgHtml}
-                <button class="delete-btn" onclick="this.parentElement.remove()">ELIMINA</button>
-            `;
-            document.getElementById('op-list').prepend(div);
+            db.ref('operazioni').push({ name, desc, imgUrl });
             document.getElementById('op-name').value = ''; 
             document.getElementById('op-desc').value = ''; 
             document.getElementById('op-img-url').value = '';
@@ -193,21 +218,19 @@
     function addCit() {
         const name = document.getElementById('cit-name').value;
         const status = document.getElementById('cit-status').value;
-        
         if(name) {
-            const row = document.getElementById('cit-table').insertRow(0);
-            let color = status === 'Alta' ? 'danger-high' : (status === 'Media' ? 'danger-med' : '');
-            
-            row.innerHTML = `
-                <td class="editable-cell" contenteditable="true">${name}</td>
-                <td class="editable-cell ${color}" contenteditable="true">${status.toUpperCase()}</td>
-                <td class="editable-cell" contenteditable="true">INSERIRE NOTE...</td>
-                <td><button class="delete-btn" onclick="this.parentElement.parentElement.remove()">X</button></td>
-            `;
+            db.ref('cittadini').push({ name, status, note: "INSERIRE NOTE..." });
             document.getElementById('cit-name').value = '';
         }
     }
-</script>
 
-</body>
-</html>
+    function renderOp(id, op) {
+        const div = document.createElement('div');
+        div.className = 'op-card';
+        let imgHtml = op.imgUrl ? `<img src="${op.imgUrl}" class="op-image" onerror="this.style.display='none'">` : '';
+        div.innerHTML = `
+            <h3>OPERAZIONE: ${op.name}</h3>
+            <p style="white-space: pre-wrap;">${op.desc}</p>
+            ${imgHtml}
+            <button class="delete-btn" onclick="deleteData('operazioni/${id}')">ELIMINA</button>
+        `;
