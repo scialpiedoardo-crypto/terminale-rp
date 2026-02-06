@@ -87,7 +87,7 @@
 
         body::before {
             content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.02));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
             z-index: 9999; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
     </style>
@@ -135,9 +135,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>NOME</th>
-                        <th>STATO</th>
-                        <th>NOTE</th>
+                        <th>NOME (MOD.)</th>
+                        <th>STATO (MOD.)</th>
+                        <th>NOTE (MOD.)</th>
                         <th>AZIONI</th>
                     </tr>
                 </thead>
@@ -151,7 +151,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
 <script>
-    // Configurazione con le TUE chiavi
+    // Configurazione SISMI-DB
     const firebaseConfig = {
       apiKey: "AIzaSyDUYP03zV8hW-lewKJIOCZbm1BuRTm_ZOw",
       authDomain: "sismi-db.firebaseapp.com",
@@ -175,31 +175,26 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-terminal').style.display = 'block';
             document.getElementById('active-user').innerText = user.toUpperCase();
-            loadData(); // Carica i dati dal DB
+            loadSavedData();
         } else {
             document.getElementById('login-error').style.display = 'block';
             setTimeout(() => { document.getElementById('login-error').style.display = 'none'; }, 3000);
         }
     }
 
-    // Carica dati in tempo reale
-    function loadData() {
+    function loadSavedData() {
         db.ref('operazioni').on('value', (snapshot) => {
             const opList = document.getElementById('op-list');
             opList.innerHTML = '';
             const data = snapshot.val();
-            for (let id in data) {
-                renderOp(id, data[id]);
-            }
+            for (let id in data) { renderOp(id, data[id]); }
         });
 
         db.ref('cittadini').on('value', (snapshot) => {
             const citTable = document.getElementById('cit-table');
             citTable.innerHTML = '';
             const data = snapshot.val();
-            for (let id in data) {
-                renderCit(id, data[id]);
-            }
+            for (let id in data) { renderCit(id, data[id]); }
         });
     }
 
@@ -234,3 +229,26 @@
             ${imgHtml}
             <button class="delete-btn" onclick="deleteData('operazioni/${id}')">ELIMINA</button>
         `;
+        document.getElementById('op-list').prepend(div);
+    }
+
+    function renderCit(id, cit) {
+        const row = document.getElementById('cit-table').insertRow(0);
+        let color = cit.status === 'Alta' ? 'danger-high' : (cit.status === 'Media' ? 'danger-med' : '');
+        row.innerHTML = `
+            <td class="editable-cell" contenteditable="true">${cit.name}</td>
+            <td class="editable-cell ${color}" contenteditable="true">${cit.status.toUpperCase()}</td>
+            <td class="editable-cell" contenteditable="true">${cit.note}</td>
+            <td><button class="delete-btn" onclick="deleteData('cittadini/${id}')">X</button></td>
+        `;
+    }
+
+    function deleteData(path) {
+        if(confirm("ELIMINARE DEFINITIVAMENTE DALL'ARCHIVIO?")) {
+            db.ref(path).remove();
+        }
+    }
+</script>
+
+</body>
+</html>
