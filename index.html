@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>S.I.S.M.I. - Terminale Operativo 1984</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            text-transform: uppercase;
+        }
+
+        .container {
+            border: 2px solid #00ff41;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+
+        h1, h2 {
+            text-align: center;
+            border-bottom: 1px solid #00ff41;
+            padding-bottom: 10px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        /* Form di inserimento */
+        .admin-panel {
+            background: #111;
+            border: 1px dashed #00ff41;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        input, textarea, select {
+            background: #000;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 5px;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        button {
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        /* Liste e Tabelle */
+        .op-card {
+            border-left: 5px solid #00ff41;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #00ff41;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .danger-high { color: #ff0000; font-weight: bold; }
+        .danger-med { color: #ffaa00; }
+
+        /* Effetto Scanline */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <p style="text-align: right;">AUTENTICAZIONE: AGENTE_001 | 198X-05-12</p>
+    <h1>SISMI - SISTEMA CENTRALE DI ARCHIVIAZIONE</h1>
+
+    <div class="section">
+        <h2>--- OPERAZIONI IN CORSO ---</h2>
+        <div class="admin-panel">
+            <strong>NUOVO INSERIMENTO MISSIONE:</strong>
+            <input type="text" id="op-name" placeholder="NOME IN CODICE OPERAZIONE">
+            <textarea id="op-desc" placeholder="DESCRIZIONE E OBIETTIVI"></textarea>
+            <button onclick="addOp()">ARCHIVIA OPERAZIONE</button>
+        </div>
+        <div id="op-list">
+            <div class="op-card">
+                <h3>OPERAZIONE: GLADIO</h3>
+                <p>Monitoraggio reti di resistenza non ortodosse. Vigilanza su settori strategici.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>--- SCHEDAZIONE CITTADINI ---</h2>
+        <div class="admin-panel">
+            <strong>SCHEDA SOGGETTO:</strong>
+            <input type="text" id="cit-name" placeholder="NOME E COGNOME">
+            <select id="cit-status">
+                <option value="Bassa">PERICOLOSITÀ: BASSA</option>
+                <option value="Media">PERICOLOSITÀ: MEDIA (SORVEGLIARE)</option>
+                <option value="Alta">PERICOLOSITÀ: ALTA (CATTURARE)</option>
+            </select>
+            <button onclick="addCit()">INSERISCI IN DATABASE</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>NOME SOGGETTO</th>
+                    <th>STATO</th>
+                    <th>AZIONE RICHIESTA</th>
+                </tr>
+            </thead>
+            <tbody id="cit-table">
+                <tr>
+                    <td>MARIO ROSSI</td>
+                    <td class="danger-med">MEDIA</td>
+                    <td>PEDINAMENTO DISCRETO</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function addOp() {
+        const name = document.getElementById('op-name').value;
+        const desc = document.getElementById('op-desc').value;
+        if(name && desc) {
+            const div = document.createElement('div');
+            div.className = 'op-card';
+            div.innerHTML = `<h3>OPERAZIONE: ${name}</h3><p>${desc}</p>`;
+            document.getElementById('op-list').prepend(div);
+        }
+    }
+
+    function addCit() {
+        const name = document.getElementById('cit-name').value;
+        const status = document.getElementById('cit-status').value;
+        if(name) {
+            const row = document.getElementById('cit-table').insertRow(0);
+            let classColor = status === 'Alta' ? 'danger-high' : (status === 'Media' ? 'danger-med' : '');
+            let action = status === 'Alta' ? 'ARRESTO IMMEDIATO' : (status === 'Media' ? 'SORVEGLIANZA' : 'NESSUNA');
+            
+            row.innerHTML = `<td>${name}</td><td class="${classColor}">${status.toUpperCase()}</td><td>${action}</td>`;
+        }
+    }
+</script>
+
+</body>
+</html>
